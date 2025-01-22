@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List Calendar</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 30px;
+        color: black;
+        background-color: lightblue;
+      }
+
+      h1 {
+        font-size: 35px;
+      }
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid red;
+        margin-top: 5px;
+        border-radius: 10px;
+      }
+      /* .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid red;
+        margin-top: 5px;
+        border-radius: 10px;
+        word-wrap: break-word;
+        flex-grow: 1;
+      } */
+      /* .myDiv {
+       
+        padding: 20px;
+        border-radius: 10px;
+        background-color: white;
+        font-size: 20px;
+        max-width: 500px;
+        border: 2px solid black;
+        font-weight: bold;
+        font-style: italic;
+      } */
+    </style>
+  </head>
+  <body>
+    <div class="container myDiv">
+      <h1 class="text-center">To-Do List Calendar</h1>
+      <div class="form-group">
+        <input
+          type="date"
+          class="form-control"
+          id="date-input"
+          aria-label="Select date"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="time"
+          class="form-control"
+          id="time-input"
+          aria-label="Select time"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="task-input"
+          placeholder="Add a new task"
+          aria-label="Task description"
+        />
+      </div>
+      <button class="btn btn-primary" id="add-task-btn">Add Task</button>
+      <div id="task-list" class="mt-4"></div>
+    </div>
+
+    <script>
+      const dateInput = document.getElementById("date-input");
+      const timeInput = document.getElementById("time-input");
+      const taskInput = document.getElementById("task-input");
+      const addTaskBtn = document.getElementById("add-task-btn");
+      const taskList = document.getElementById("task-list");
+
+      let tasks = {};
+
+      window.onload = () => {
+        const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+        if (storedTasks) {
+          tasks = storedTasks;
+          displayTasks();
+          // console.log("tasks loaded");
+        }
+      };
+
+      dateInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          // console.log("Date input");
+          timeInput.focus();
+          event.preventDefault();
+        }
+      });
+
+      timeInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          // console.log("Time input");
+          taskInput.focus();
+          event.preventDefault();
+        }
+      });
+
+      taskInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          // console.log("Task input");
+          addTaskBtn.click();
+          event.preventDefault();
+        }
+      });
+
+      // addTaskBtn.addEventListener("click", () => {
+      //   const date = dateInput.value;
+      //   const time = timeInput.value;
+      //   const task = taskInput.value;
+
+      //   if (date && time && task) {
+      //     const taskWithTime = `${time}: ${task}`;
+      //     if (!tasks[date]) {
+      //       tasks[date] = [];
+      //     }
+      //     tasks[date].push(taskWithTime);
+      //     localStorage.setItem("tasks", JSON.stringify(tasks));
+      //     taskInput.value = "";
+      //     timeInput.value = "";
+      //     displayTasks();
+      //     console.log("tasks: " + JSON.stringify(tasks));
+      //     alert("Task added successfully!");
+      //   } else {
+      //     alert("Please select a date, time, and enter a task.");
+      //   }
+      // });
+      addTaskBtn.addEventListener("click", () => {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        const task = taskInput.value;
+
+        if (date && time && task) {
+          const inputDateTime = new Date(`${date}T${time}:00`);
+          const currentDateTime = new Date();
+
+          if (inputDateTime < currentDateTime) {
+            alert("The time is in the past. Please provide a future time.");
+            return;
+          }
+
+          const taskWithTime = `${time}: ${task}`;
+
+          if (!tasks[date]) {
+            tasks[date] = [];
+          }
+
+          tasks[date].push(taskWithTime);
+          localStorage.setItem("tasks", JSON.stringify(tasks));
+
+          taskInput.value = "";
+          timeInput.value = "";
+
+          displayTasks();
+
+          console.log("tasks: " + JSON.stringify(tasks));
+          // ale  rt("Task added successfully!");
+        } else {
+          alert("Please select a date, time, and enter a task.");
+        }
+      });
+
+      function displayTasks() {
+        taskList.innerHTML = "";
+        const sortedDates = Object.keys(tasks).sort();
+
+        sortedDates.forEach((date) => {
+          const dateDiv = document.createElement("div");
+          dateDiv.innerHTML = `<strong>${date}</strong>`;
+
+          tasks[date].sort();
+          tasks[date].forEach((task, index) => {
+            const taskItem = document.createElement("div");
+            taskItem.className = "task-item";
+            taskItem.innerHTML = `${task} <button class="btn btn-danger btn-sm" onclick="removeTask('${date}', ${index})">Remove</button>`;
+            dateDiv.appendChild(taskItem);
+          });
+
+          taskList.appendChild(dateDiv);
+        });
+      }
+
+      function removeTask(date, index) {
+        tasks[date].splice(index, 1);
+        if (tasks[date].length === 0) {
+          delete tasks[date];
+        }
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        displayTasks();
+        // alert('Task removed successfully!');
+        console.log("Task removed successfully!");
+      }
+    </script>
+  </body>
+</html>

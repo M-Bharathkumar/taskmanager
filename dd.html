@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-Do List Calendar</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 30px;
+        color: black;
+        background-color: lightblue;
+      }
+
+      h1 {
+        font-size: 35px;
+      }
+
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: flex-start;
+        padding: 10px;
+        border: 1px solid red;
+        margin-top: 5px;
+        border-radius: 10px;
+        flex: 1;
+      }
+
+      .task-time {
+        margin-right: 10px;
+        font-weight: bold;
+      }
+
+      .task-content {
+        flex-grow: 1;
+        margin-right: 10px;
+        word-break: break-all;
+      }
+
+      .remove-button {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container myDiv">
+      <h1 class="text-center">To-Do List Calendar</h1>
+      <div class="form-group">
+        <input
+          type="date"
+          class="form-control"
+          id="date-input"
+          aria-label="Select date"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="time"
+          class="form-control"
+          id="time-input"
+          aria-label="Select time"
+        />
+      </div>
+      <div class="form-group">
+        <input
+          type="text"
+          class="form-control"
+          id="task-input"
+          placeholder="Add a new task"
+          aria-label="Task description"
+        />
+      </div>
+      <button class="btn btn-primary" id="add-task-btn">Add Task</button>
+      <div id="task-list" class="mt-4"></div>
+    </div>
+
+    <script>
+      const dateInput = document.getElementById("date-input");
+      const timeInput = document.getElementById("time-input");
+      const taskInput = document.getElementById("task-input");
+      const addTaskBtn = document.getElementById("add-task-btn");
+      const taskList = document.getElementById("task-list");
+
+      let tasks = {};
+
+      window.onload = () => {
+        const storedTasks = JSON.parse(localStorage.getItem("tasks"));
+        if (storedTasks) {
+          tasks = storedTasks;
+          displayTasks();
+        }
+      };
+
+      dateInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          timeInput.focus();
+          event.preventDefault();
+        }
+      });
+
+      timeInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          taskInput.focus();
+          event.preventDefault();
+        }
+      });
+
+      taskInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          addTaskBtn.click();
+          event.preventDefault();
+        }
+      });
+
+      addTaskBtn.addEventListener("click", () => {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        const task = taskInput.value;
+
+        if (date && time && task) {
+          const taskWithTime = `${time}: ${task}`;
+          if (!tasks[date]) {
+            tasks[date] = [];
+          }
+          tasks[date].push(taskWithTime);
+          localStorage.setItem("tasks", JSON.stringify(tasks));
+          taskInput.value = "";
+          timeInput.value = "";
+          displayTasks();
+          console.log("tasks: " + JSON.stringify(tasks));
+        } else {
+          alert("Please select a date, time, and enter a task.");
+        }
+      });
+
+      //   function displayTasks() {
+      //     taskList.innerHTML = "";
+      //     const sortedDates = Object.keys(tasks).sort();
+      //     k = 0;
+      //     const currentDate = new Date();
+      //     sortedDates.forEach((date) => {
+      //     //   if (taskDate >= currentDate) {
+      //         const dateDiv = document.createElement("div");
+      //         dateDiv.innerHTML = `<strong>${date}</strong>`;
+
+      //         tasks[date].sort();
+      //         dateDiv.style.cursor = "pointer";
+
+      //         tasks[date].forEach((task, index) => {
+      //           const taskItem = document.createElement("div");
+      //           taskItem.className = "task-item";
+
+      //           const taskTime = document.createElement("div");
+      //           taskTime.className = "task-time";
+      //           taskTime.textContent = task.split(": ")[0];
+
+      //           const taskContent = document.createElement("div");
+      //           taskContent.className = "task-content";
+      //           taskContent.textContent = task.split(": ").slice(1).join(": ");
+
+      //           const removeButton = document.createElement("div");
+      //           removeButton.className = "remove-button";
+      //           const button = document.createElement("button");
+      //           button.className = "btn btn-danger btn-sm";
+      //           button.textContent = "Remove";
+      //           button.onclick = () => removeTask(date, index);
+
+      //           removeButton.appendChild(button);
+      //           taskItem.appendChild(taskTime);
+      //           taskItem.appendChild(taskContent);
+      //           taskItem.appendChild(removeButton);
+      //           if (k == 0) {
+      //             taskItem.style.backgroundColor = "white";
+      //           }
+      //           dateDiv.appendChild(taskItem);
+      //           k++;
+      //         });
+
+      //         taskList.appendChild(dateDiv);
+      //     //   } else {
+      //     //     alert(
+      //     //       "No tasks scheduled for this date and time. Please Give the Upcoming date and time"
+      //     //     );
+      //     //   }
+      //     });
+      //   }
+      function displayTasks() {
+        taskList.innerHTML = "";
+        const sortedDates = Object.keys(tasks).sort();
+        const currentDate = new Date();
+        currentDate.setSeconds(0);
+        currentDate.setMilliseconds(0);
+
+        let hasFutureTasks = false;
+
+        sortedDates.forEach((date) => {
+          const taskDate = new Date(date);
+          taskDate.setHours(0, 0, 0, 0);
+
+          if (taskDate > currentDate) {
+            hasFutureTasks = true;
+          } else if (taskDate.getTime() === currentDate.getTime()) {
+            tasks[date].forEach((task) => {
+              const [taskTimeString] = task.split(": ");
+              const [taskHours, taskMinutes] = taskTimeString
+                .split(":")
+                .map(Number);
+              const taskTime = new Date(currentDate);
+              taskTime.setHours(taskHours, taskMinutes, 0);
+
+              if (taskTime > currentDate) {
+                hasFutureTasks = true;
+              }
+            });
+          }
+        });
+
+        if (!hasFutureTasks) {
+          alert("No tasks scheduled for today or in the future.");
+          return;
+        }
+
+        sortedDates.forEach((date) => {
+          const taskDate = new Date(date);
+          taskDate.setHours(0, 0, 0, 0);
+
+          if (taskDate >= currentDate) {
+            const dateDiv = document.createElement("div");
+            dateDiv.innerHTML = `<strong>${date}</strong>`;
+
+            tasks[date].sort();
+            dateDiv.style.cursor = "pointer";
+
+            tasks[date].forEach((task, index) => {
+              const [taskTimeString] = task.split(": ");
+              const [taskHours, taskMinutes] = taskTimeString
+                .split(":")
+                .map(Number);
+              const taskTime = new Date(currentDate);
+              taskTime.setHours(taskHours, taskMinutes, 0);
+
+              if (taskTime >= currentDate || taskDate > currentDate) {
+                const taskItem = document.createElement("div");
+                taskItem.className = "task-item";
+
+                const taskTimeDiv = document.createElement("div");
+                taskTimeDiv.className = "task-time";
+                taskTimeDiv.textContent = task.split(": ")[0];
+
+                const taskContent = document.createElement("div");
+                taskContent.className = "task-content";
+                taskContent.textContent = task.split(": ").slice(1).join(": ");
+
+                const removeButton = document.createElement("div");
+                removeButton.className = "remove-button";
+                const button = document.createElement("button");
+                button.className = "btn btn-danger btn-sm";
+                button.textContent = "Remove";
+                button.onclick = () => removeTask(date, index);
+
+                removeButton.appendChild(button);
+                taskItem.appendChild(taskTimeDiv);
+                taskItem.appendChild(taskContent);
+                taskItem.appendChild(removeButton);
+
+                dateDiv.appendChild(taskItem);
+              }
+            });
+
+            taskList.appendChild(dateDiv);
+          }
+        });
+      }
+
+      function removeTask(date, index) {
+        tasks[date].splice(index, 1);
+        if (tasks[date].length === 0) {
+          delete tasks[date];
+        }
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+        displayTasks();
+        console.log("Task removed successfully!");
+      }
+    </script>
+  </body>
+</html>

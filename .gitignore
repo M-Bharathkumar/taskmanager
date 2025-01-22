@@ -1,0 +1,7 @@
+node_modules/
+
+.vscode/
+
+Backend/package-lock.json
+
+Backend/package.json
