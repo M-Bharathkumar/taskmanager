@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.25" />
+    <title>To-Do List Calendar</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 30px;
+        color: black;
+        background-color: lightblue;
+      }
+
+      h1 {
+        font-size: 35px;
+      }
+
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: flex-start;
+        padding: 10px;
+        border: 1px solid red;
+        margin-top: 5px;
+        border-radius: 10px;
+        flex: 1;
+      }
+
+      .task-time {
+        margin-right: 10px;
+        font-weight: bold;
+      }
+
+      .task-content {
+        flex-grow: 1;
+        margin-right: 10px;
+        word-break: break-all;
+      }
+
+      .remove-button {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container myDiv">
+      <h1 class="text-center">To-Do List Calendar</h1>
+      <form id="add-task-form">
+        <div class="form-group">
+          <input
+            type="datetime-local"
+            class="form-control"
+            id="date-input"
+            aria-label="Select date"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="task-input"
+            placeholder="Add a new task"
+            aria-label="Task description"
+          />
+        </div>
+        <button class="btn btn-primary" type="submit">Add Task</button>
+      </form>
+      <ul id="tasks-container" class="mt-4"></ul>
+    </div>
+
+    <script src="tasklog.js"></script>
+  </body>
+</html>
